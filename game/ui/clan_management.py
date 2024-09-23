@@ -1,9 +1,9 @@
-# game/ui/clan_management.py
-
 from blessed import Terminal
+from game.ui.character_creation import character_creation
 from game.models.adventurer import Adventurer
 
 term = Terminal()
+
 
 def clan_management_interface(adventurers):
     current_page = 1
@@ -32,7 +32,7 @@ def clan_management_interface(adventurers):
         print('G. Return to Town Menu\n')
 
         print('Please select an option by entering its number or letter: ', end='', flush=True)
-        val = input().strip()
+        val = input().strip().lower()
 
         if val.isdigit():
             selection = int(val)
@@ -44,24 +44,26 @@ def clan_management_interface(adventurers):
             else:
                 print(term.red('\nInvalid selection. Please try again.'))
                 input('\nPress Enter to continue...')
-        elif val.lower() == 'a':
+        elif val == 'a':
             select_adventurer_for_details(adventurers)
-        elif val.lower() == 'b':
+        elif val == 'b':
             form_party(adventurers)
-        elif val.lower() == 'c':
+        elif val == 'c':
             heal_adventurers(adventurers)
-        elif val.lower() == 'd':
+        elif val == 'd':
             resurrect_adventurers(adventurers)
-        elif val.lower() == 'e':
+        elif val == 'e':
             # Create new adventurer
             new_adv = character_creation()
             if new_adv:
                 adventurers.append(new_adv)
-        elif val.lower() == 'f':
+                print(f"\n{new_adv.name} has joined your clan!")
+                input('\nPress Enter to continue...')
+        elif val == 'f':
             # Implement filter/sort functionality
             print('\n[Filter/Sort functionality is not yet implemented.]')
             input('\nPress Enter to continue...')
-        elif val.lower() == 'g':
+        elif val == 'g':
             # Return to town menu
             return
         else:
@@ -118,13 +120,15 @@ def view_adventurer_details(adventurer):
             print(f"  {slot}: {item_name}")
         print('\nOPTIONS:')
         print('A. Return to Previous Menu')
-        print('B. Heal Adventurer')
-        print('C. Resurrect Adventurer' if not adventurer.is_alive else '')
+        if adventurer.is_alive:
+            print('B. Heal Adventurer')
+        else:
+            print('C. Resurrect Adventurer')
         print('\nPlease select an option: ', end='', flush=True)
         val = input().strip().lower()
         if val == 'a':
             break
-        elif val == 'b':
+        elif val == 'b' and adventurer.is_alive:
             heal_adventurer(adventurer)
         elif val == 'c' and not adventurer.is_alive:
             resurrect_adventurer(adventurer)
@@ -133,26 +137,9 @@ def view_adventurer_details(adventurer):
             input('\nPress Enter to continue...')
 
 
-def form_party(adventurers):
-    # Implement party formation logic
-    print('\n[Party formation functionality is not yet implemented.]')
-    input('\nPress Enter to continue...')
-
-
 def heal_adventurer(adventurer):
-    if adventurer.is_alive:
-        adventurer.current_hp = adventurer.max_hp
-        print(f"\n{adventurer.name} has been healed to full health.")
-    else:
-        print(term.red(f"\n{adventurer.name} cannot be healed because they are deceased."))
-    input('\nPress Enter to continue...')
-
-
-def heal_adventurers(adventurers):
-    for adv in adventurers:
-        if adv.is_alive:
-            adv.current_hp = adv.max_hp
-    print("\nAll alive adventurers have been healed to full health.")
+    adventurer.current_hp = adventurer.max_hp
+    print(f"\n{adventurer.name} has been healed to full health.")
     input('\nPress Enter to continue...')
 
 
@@ -168,6 +155,19 @@ def resurrect_adventurer(adventurer):
             print(term.red(f"\nResurrection failed. {adventurer.name} remains deceased."))
     else:
         print(term.red(f"\n{adventurer.name} is already alive."))
+    input('\nPress Enter to continue...')
+
+
+def heal_adventurers(adventurers):
+    any_healed = False
+    for adv in adventurers:
+        if adv.is_alive and adv.current_hp < adv.max_hp:
+            adv.current_hp = adv.max_hp
+            any_healed = True
+    if any_healed:
+        print("\nAll alive adventurers have been healed to full health.")
+    else:
+        print("\nAll alive adventurers are already at full health.")
     input('\nPress Enter to continue...')
 
 
