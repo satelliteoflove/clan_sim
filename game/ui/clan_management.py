@@ -1,11 +1,13 @@
 from blessed import Terminal
 from game.ui.character_creation import character_creation
 from game.models.adventurer import Adventurer
+from game.models.party import Party
+
 
 term = Terminal()
 
 
-def clan_management_interface(adventurers):
+def clan_management_interface(adventurers, parties, active_party):
     current_page = 1
     page_size = 10
     total_pages = (len(adventurers) - 1) // page_size + 1
@@ -24,7 +26,7 @@ def clan_management_interface(adventurers):
         print('\n0. Next Page')
         print('OPTIONS:')
         print('A. View Adventurer Details')
-        print('B. Form Party')
+        print('B. Manage Parties')
         print('C. Heal Adventurers')
         print('D. Resurrect Fallen Adventurers')
         print('E. Create New Adventurer')
@@ -47,7 +49,7 @@ def clan_management_interface(adventurers):
         elif val == 'a':
             select_adventurer_for_details(adventurers)
         elif val == 'b':
-            form_party(adventurers)
+            manage_parties_interface(adventurers, parties, active_party)
         elif val == 'c':
             heal_adventurers(adventurers)
         elif val == 'd':
@@ -179,4 +181,231 @@ def resurrect_adventurers(adventurers):
             any_resurrected = True
     if not any_resurrected:
         print("\nNo deceased adventurers to resurrect.")
+        input('\nPress Enter to continue...')
+
+
+def manage_parties_interface(adventurers, parties, active_party):
+    while True:
+        print(term.clear())
+        print(term.bold('MANAGE PARTIES').center(term.width))
+        print('\nParties:')
+        for idx, party in enumerate(parties, start=1):
+            status = 'Active' if party == active_party else 'In Town'
+            print(f"{idx}. {party.name} - Members: {len(party.members)} - {status}")
+        print('\nOPTIONS:')
+        print('A. Create New Party')
+        print('B. Edit Party')
+        print('C. Set Active Party')
+        print('D. Delete Party')
+        print('E. Return to Clan Management\n')
+
+        print('Please select an option by entering its number or letter: ', end='', flush=True)
+        val = input().strip().lower()
+        if val.isdigit():
+            selection = int(val)
+            if 1 <= selection <= len(parties):
+                selected_party = parties[selection - 1]
+                edit_party_interface(adventurers, selected_party)
+            else:
+                print(term.red('\nInvalid selection. Please try again.'))
+                input('\nPress Enter to continue...')
+        elif val == 'a':
+            create_new_party(adventurers, parties)
+        elif val == 'b':
+            edit_existing_party(adventurers, parties)
+        elif val == 'c':
+            set_active_party(parties, active_party)
+        elif val == 'd':
+            delete_party(parties, active_party)
+        elif val == 'e':
+            return
+        else:
+            print(term.red('\nInvalid input. Please try again.'))
+            input('\nPress Enter to continue...')
+
+
+def create_new_party(adventurers, parties):
+    print('\nEnter a name for the new party: ', end='', flush=True)
+    name = input().strip()
+    new_party = Party(name)
+    parties.append(new_party)
+    print(f"\nParty '{name}' has been created.")
+    input('\nPress Enter to continue...')
+    edit_party_interface(adventurers, new_party)
+
+
+def edit_party_interface(adventurers, party):
+    while True:
+        print(term.clear())
+        print(term.bold(f"EDIT PARTY - {party.name}").center(term.width))
+        party.print_formation()
+        print('\nOPTIONS:')
+        print('A. Add Adventurer')
+        print('B. Remove Adventurer')
+        print('C. Rearrange Formation')
+        print('D. Return to Parties Menu\n')
+
+        print('Please select an option: ', end='', flush=True)
+        val = input().strip().lower()
+        if val == 'a':
+            add_adventurer_to_party(adventurers, party)
+        elif val == 'b':
+            remove_adventurer_from_party(party)
+        elif val == 'c':
+            rearrange_party_formation(party)
+        elif val == 'd':
+            break
+        else:
+            print(term.red('\nInvalid selection. Please try again.'))
+            input('\nPress Enter to continue...')
+
+
+def add_adventurer_to_party(adventurers, party):
+    available_adventurers = [adv for adv in adventurers if adv not in party.members]
+    if not available_adventurers:
+        print("\nNo available adventurers to add.")
+        input('\nPress Enter to continue...')
+        return
+    print('\nAvailable Adventurers:')
+    for idx, adv in enumerate(available_adventurers, start=1):
+        status = 'Healthy' if adv.is_alive else 'Deceased'
+        print(f"{idx}. {adv.name} - {adv.char_class} - Lvl {adv.level} - Status: {status}")
+    print('\n0. Cancel')
+    print('\nSelect an adventurer to add: ', end='', flush=True)
+    val = input().strip()
+    if val.isdigit():
+        selection = int(val)
+        if selection == 0:
+            return
+        elif 1 <= selection <= len(available_adventurers):
+            selected_adv = available_adventurers[selection - 1]
+            print('\nEnter position to place the adventurer (row,column): ', end='', flush=True)
+            pos_input = input().strip()
+            try:
+                row_str, col_str = pos_input.split(',')
+                row = int(row_str) - 1
+                col = int(col_str) - 1
+                if 0 <= row <= 2 and 0 <= col <= 1:
+                    success = party.add_member(selected_adv, position=(row, col))
+                    if success:
+                        print(f"\n{selected_adv.name} added to the party at position ({row + 1}, {col + 1}).")
+                    input('\nPress Enter to continue...')
+                else:
+                    print(term.red('\nInvalid position. Rows are 1-3, columns are 1-2.'))
+                    input('\nPress Enter to continue...')
+            except ValueError:
+                print(term.red('\nInvalid input format. Please enter as row,column (e.g., 1,1).'))
+                input('\nPress Enter to continue...')
+        else:
+            print(term.red('\nInvalid selection. Please try again.'))
+            input('\nPress Enter to continue...')
+    else:
+        print(term.red('\nInvalid input. Please try again.'))
+        input('\nPress Enter to continue...')
+
+
+def remove_adventurer_from_party(party):
+    if not party.members:
+        print("\nNo adventurers in the party.")
+        input('\nPress Enter to continue...')
+        return
+    print('\nParty Members:')
+    for idx, adv in enumerate(party.members, start=1):
+        print(f"{idx}. {adv.name}")
+    print('\n0. Cancel')
+    print('\nSelect an adventurer to remove: ', end='', flush=True)
+    val = input().strip()
+    if val.isdigit():
+        selection = int(val)
+        if selection == 0:
+            return
+        elif 1 <= selection <= len(party.members):
+            selected_adv = party.members[selection - 1]
+            party.remove_member(selected_adv)
+            print(f"\n{selected_adv.name} has been removed from the party.")
+            input('\nPress Enter to continue...')
+        else:
+            print(term.red('\nInvalid selection. Please try again.'))
+            input('\nPress Enter to continue...')
+    else:
+        print(term.red('\nInvalid input. Please try again.'))
+        input('\nPress Enter to continue...')
+
+
+def rearrange_party_formation(party):
+    party.print_formation()
+    print('\nEnter the position to move from (row,column): ', end='', flush=True)
+    from_input = input().strip()
+    print('Enter the position to move to (row,column): ', end='', flush=True)
+    to_input = input().strip()
+    try:
+        from_row_str, from_col_str = from_input.split(',')
+        to_row_str, to_col_str = to_input.split(',')
+        from_row = int(from_row_str) - 1
+        from_col = int(from_col_str) - 1
+        to_row = int(to_row_str) - 1
+        to_col = int(to_col_str) - 1
+        if all(0 <= idx <= 2 for idx in [from_row, to_row]) and all(0 <= idx <= 1 for idx in [from_col, to_col]):
+            success = party.move_member((from_row, from_col), (to_row, to_col))
+            if success:
+                print("\nAdventurer moved successfully.")
+            input('\nPress Enter to continue...')
+        else:
+            print(term.red('\nInvalid positions. Rows are 1-3, columns are 1-2.'))
+            input('\nPress Enter to continue...')
+    except ValueError:
+        print(term.red('\nInvalid input format. Please enter as row,column (e.g., 1,1).'))
+        input('\nPress Enter to continue...')
+
+
+def set_active_party(parties, active_party):
+    print('\nSelect a party to set as active:')
+    for idx, party in enumerate(parties, start=1):
+        print(f"{idx}. {party.name}")
+    print('\n0. Cancel')
+    print('\nYour choice: ', end='', flush=True)
+    val = input().strip()
+    if val.isdigit():
+        selection = int(val)
+        if selection == 0:
+            return
+        elif 1 <= selection <= len(parties):
+            new_active_party = parties[selection - 1]
+            active_party[0] = new_active_party  # Use a mutable type like list to allow reassignment
+            print(f"\n{new_active_party.name} is now the active party.")
+            input('\nPress Enter to continue...')
+        else:
+            print(term.red('\nInvalid selection. Please try again.'))
+            input('\nPress Enter to continue...')
+    else:
+        print(term.red('\nInvalid input. Please try again.'))
+        input('\nPress Enter to continue...')
+
+
+def delete_party(parties, active_party):
+    print('\nSelect a party to delete:')
+    for idx, party in enumerate(parties, start=1):
+        status = 'Active' if party == active_party[0] else 'In Town'
+        print(f"{idx}. {party.name} - {status}")
+    print('\n0. Cancel')
+    print('\nYour choice: ', end='', flush=True)
+    val = input().strip()
+    if val.isdigit():
+        selection = int(val)
+        if selection == 0:
+            return
+        elif 1 <= selection <= len(parties):
+            party_to_delete = parties[selection - 1]
+            if party_to_delete == active_party[0]:
+                print(term.red("\nCannot delete the active party. Set another party as active first."))
+                input('\nPress Enter to continue...')
+            else:
+                parties.remove(party_to_delete)
+                print(f"\nParty '{party_to_delete.name}' has been deleted.")
+                input('\nPress Enter to continue...')
+        else:
+            print(term.red('\nInvalid selection. Please try again.'))
+            input('\nPress Enter to continue...')
+    else:
+        print(term.red('\nInvalid input. Please try again.'))
         input('\nPress Enter to continue...')
