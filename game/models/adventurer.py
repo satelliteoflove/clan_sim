@@ -9,7 +9,12 @@ class Adventurer:
         self.char_class = char_class
         self.level = 1
         self.experience = 0
+        self.max_hp = self.calculate_max_hp()
+        self.current_hp = self.max_hp
+        self.is_alive = True
         self.equipment = {}
         self.skills = []
-        # Additional initialization as needed
+        self.is_defending = False
 
+    def calculate_max_hp(self):
+        return 10 + self.stats.get('Endurance', 5) * 2
