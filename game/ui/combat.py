@@ -5,6 +5,7 @@ from random import randint
 
 term = Terminal()
 
+
 def combat_interface(party, enemies):
     combat_over = False
     while not combat_over:
