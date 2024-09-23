@@ -1,0 +1,36 @@
+[
+    {
+        "title": "An Ancient Relic",
+        "description": "While exploring the dungeon, you find a mysterious ancient relic.",
+        "theme": "Ancient Ruins",
+        "choices": [
+            {
+                "text": "Take the relic.",
+                "outcome": "You feel a surge of power as you pick up the relic.",
+                "effect": "gain_item"
+            },
+            {
+                "text": "Leave it alone.",
+                "outcome": "You decide it's best not to disturb unknown artifacts.",
+                "effect": "none"
+            }
+        ]
+    },
+    {
+        "title": "Enchanted Glade",
+        "description": "You stumble upon a peaceful glade filled with glowing plants.",
+        "theme": "Enchanted Forest",
+        "choices": [
+            {
+                "text": "Rest here.",
+                "outcome": "Your party feels rejuvenated.",
+                "effect": "heal_party"
+            },
+            {
+                "text": "Move on quickly.",
+                "outcome": "You continue your journey without incident.",
+                "effect": "none"
+            }
+        ]
+    }
+]

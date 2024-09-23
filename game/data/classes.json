@@ -1,0 +1,23 @@
+[
+    {
+        "name": "Warrior",
+        "allowed_alignments": ["Good", "Neutral", "Evil"],
+        "stat_requirements": {"Strength": 7, "Endurance": 6}
+    },
+    {
+        "name": "Mage",
+        "allowed_alignments": ["Good", "Neutral", "Evil"],
+        "stat_requirements": {"Intelligence": 7, "Wisdom": 6}
+    },
+    {
+        "name": "Paladin",
+        "allowed_alignments": ["Good"],
+        "stat_requirements": {"Strength": 6, "Endurance": 6, "Wisdom": 5}
+    },
+    {
+        "name": "Assassin",
+        "allowed_alignments": ["Evil"],
+        "stat_requirements": {"Agility": 7, "Intelligence": 5}
+    }
+]
+

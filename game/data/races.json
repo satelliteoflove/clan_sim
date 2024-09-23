@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Human",
+        "stat_bonuses": {},
+        "base_stats": {"Strength": 5, "Agility": 5, "Intelligence": 5, "Endurance": 5, "Wisdom": 5},
+        "max_stats": {"Strength": 10, "Agility": 10, "Intelligence": 10, "Endurance": 10, "Wisdom": 10}
+    },
+    {
+        "name": "Elf",
+        "stat_bonuses": {"Agility": 1, "Intelligence": 1},
+        "base_stats": {"Strength": 4, "Agility": 6, "Intelligence": 6, "Endurance": 4, "Wisdom": 5},
+        "max_stats": {"Strength": 8, "Agility": 12, "Intelligence": 12, "Endurance": 8, "Wisdom": 10}
+    },
+    {
+        "name": "Dwarf",
+        "stat_bonuses": {"Strength": 1, "Endurance": 1},
+        "base_stats": {"Strength": 6, "Agility": 4, "Intelligence": 4, "Endurance": 6, "Wisdom": 5},
+        "max_stats": {"Strength": 12, "Agility": 8, "Intelligence": 8, "Endurance": 12, "Wisdom": 10}
+    },
+    {
+        "name": "Orc",
+        "stat_bonuses": {"Strength": 2},
+        "base_stats": {"Strength": 7, "Agility": 4, "Intelligence": 3, "Endurance": 6, "Wisdom": 3},
+        "max_stats": {"Strength": 14, "Agility": 8, "Intelligence": 6, "Endurance": 12, "Wisdom": 6}
+    }
+]
+
