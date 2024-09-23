@@ -2,6 +2,7 @@
 
 import json
 import os
+import random
 
 
 def load_races():
