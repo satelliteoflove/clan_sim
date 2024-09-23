@@ -33,7 +33,7 @@ def combat_interface(party, enemies):
                     # Attack
                     target = select_target(enemies)
                     if target:
-                        perform_attack(member, target)
+                        perform_attack(attacker, target)
                 elif val == '2':
                     # Use Skill (not implemented)
                     print("\nSkills are not yet implemented.")
@@ -60,7 +60,7 @@ def combat_interface(party, enemies):
         for enemy in enemies:
             if enemy.is_alive:
                 target = select_random_target(party)
-                perform_attack(enemy, target)
+                perform_attack(attacker, target)
         # Check if all party members are defeated
         if all(not member.is_alive for member in party):
             print(term.red("\nYour party has been defeated!"))
@@ -88,26 +88,23 @@ def select_target(enemies):
         return select_target(enemies)
 
 
-def perform_attack(attacker, defender):
-    damage = calculate_damage(attacker, defender)
-    defender.current_hp -= damage
-    if defender.current_hp <= 0:
-        defender.is_alive = False
-        defender.current_hp = 0
-        print(f"\n{attacker.name} attacks {defender.name} for {damage} damage. {defender.name} has been defeated!")
+def perform_attack(attacker, target):
+    damage = attacker.attack(target)
+    if target.current_hp <= 0:
+        print(f"\n{attacker.name} attacks {target.name} for {damage} damage. {target.name} has been defeated!")
     else:
-        print(f"\n{attacker.name} attacks {defender.name} for {damage} damage. {defender.name} has {defender.current_hp} HP remaining.")
+        print(f"\n{attacker.name} attacks {target.name} for {damage} damage. {target.name} has {target.current_hp} HP remaining.")
     input('\nPress Enter to continue...')
 
 
-def calculate_damage(attacker, defender):
-    # Simple damage formula: attacker's Strength minus defender's Endurance
-    base_damage = attacker.stats.get('Strength', 5) - defender.stats.get('Endurance', 5)
+def calculate_damage(attacker, target):
+    # Simple damage formula: attacker's Strength minus target's Endurance
+    base_damage = attacker.stats.get('Strength', 5) - target.stats.get('Endurance', 5)
     if base_damage < 1:
         base_damage = 1
-    if defender.is_defending:
+    if target.is_defending:
         base_damage = base_damage // 2  # Defender takes half damage
-        defender.is_defending = False  # Reset defending status
+        target.is_defending = False  # Reset defending status
     # Add randomness
     damage = base_damage + randint(-2, 2)
     if damage < 1:
