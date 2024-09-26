@@ -8,17 +8,18 @@ class Character:
         self.max_hp = self.calculate_max_hp()
         self.current_hp = self.max_hp
         self.is_alive = True
-        self.is_defending = False  # Combat status
+        self.is_defending = False
 
     def calculate_max_hp(self):
-        # Example formula for max HP
+        # Example (crappy) formula for max HP
         return 10 + self.stats.get('Endurance', 5) * 2
 
     def take_damage(self, damage):
         self.current_hp -= damage
         if self.current_hp <= 0:
+            # Prevent negative HP and mark as dead
             self.current_hp = 0
-            self.is_alive = False
+            self.is_alive = False 
 
     def attack(self, target):
         damage = self.calculate_damage(target)
@@ -32,7 +33,7 @@ class Character:
             base_damage = 1
         if target.is_defending:
             base_damage = base_damage // 2  # Defender takes half damage
-            target.is_defending = False  # Reset defending status
+            # TODO: Reset defending status at end of turn
         return base_damage
 
     def to_dict(self):
