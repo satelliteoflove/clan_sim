@@ -98,40 +98,37 @@ def allocate_bonus_points(race_name):
                 print(term.red('\nYou must allocate all bonus points before proceeding.'))
                 input('\nPress Enter to continue...')
                 continue
-
-        elif key.is_sequence:
-            # Handle Shift + Letter
-            if key.code and key.name.startswith('KEY_SHIFT_'):
-                letter = key.name[-1].lower()
+        else:
+            # Get the character as a string
+            char = str(key)
+            if char.isalpha():
+                letter = char.lower()
                 if letter in stat_letters:
                     stat = stat_letters[letter]
-                    if stats[stat] > base_stats[stat]:
-                        stats[stat] -= 1
+                    if char.isupper():
+                        # Handle point decrements
+                        if stats[stat] > base_stats[stat]:
+                            stats[stat] -= 1
+                        else:
+                            print(term.red(f"\nCannot reduce {stat} below base value."))
+                            input('\nPress Enter to continue...')
                     else:
-                        print(term.red(f"\nCannot reduce {stat} below base value."))
-                        input('\nPress Enter to continue...')
+                        # Handle point increments
+                        if remaining_points > 0 and stats[stat] < max_stats[stat]:
+                            stats[stat] += 1
+                        elif stats[stat] >= max_stats[stat]:
+                            print(term.red(f"\n{stat} has reached its maximum value."))
+                            input('\nPress Enter to continue...')
+                        else:
+                            print(term.red('\nNo bonus points remaining.'))
+                            input('\nPress Enter to continue...')
                 else:
                     print(term.red('\nInvalid stat key. Please try again.'))
                     input('\nPress Enter to continue...')
             else:
-                print(term.red('\nInvalid key. Please try again.'))
+                print(term.red('\nInvalid input. Please press a letter key.'))
                 input('\nPress Enter to continue...')
-        else:
-            # Handle single letter keys for adding points
-            letter = key.lower()
-            if letter in stat_letters:
-                stat = stat_letters[letter]
-                if remaining_points > 0 and stats[stat] < max_stats[stat]:
-                    stats[stat] += 1
-                elif stats[stat] >= max_stats[stat]:
-                    print(term.red(f"\n{stat} has reached its maximum value."))
-                    input('\nPress Enter to continue...')
-                else:
-                    print(term.red('\nNo bonus points remaining.'))
-                    input('\nPress Enter to continue...')
-            else:
-                print(term.red('\nInvalid stat key. Please try again.'))
-                input('\nPress Enter to continue...')
+
 
 def determine_available_classes(alignment, stats):
     classes = data_loader.load_classes()
