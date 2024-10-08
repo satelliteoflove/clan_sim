@@ -261,7 +261,7 @@ def edit_party_interface(adventurers, party):
 
 
 def add_adventurer_to_party(adventurers, party):
-    available_adventurers = [adv for adv in adventurers if adv not in party.members]
+    available_adventurers = [adv for adv in adventurers if adv not in party.members and adv.is_alive]
     if not available_adventurers:
         print("\nNo available adventurers to add.")
         input('\nPress Enter to continue...')
