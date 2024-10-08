@@ -1,4 +1,6 @@
 from game.models.character import Character
+from game.models.item import Item
+from game.models.skill import Skill
 
 class Adventurer(Character):
     def __init__(self, name, race, alignment, stats, char_class):
