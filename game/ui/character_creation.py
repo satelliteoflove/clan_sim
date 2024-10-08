@@ -72,14 +72,9 @@ def allocate_bonus_points(race_name):
     race = data_loader.get_race_by_name(race_name)
     base_stats = race['base_stats']
     max_stats = race['max_stats']
-    stat_bonuses = race['stat_bonuses']
     bonus_points = 10
     stats = base_stats.copy()
     
-    # Apply race stat bonuses
-    for stat, bonus in stat_bonuses.items():
-        stats[stat] += bonus
-
     stat_keys = list(stats.keys())
     stat_letters = {stat[0].lower(): stat for stat in stat_keys}
 

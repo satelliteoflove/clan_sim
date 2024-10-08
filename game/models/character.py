@@ -11,7 +11,6 @@ class Character:
         self.is_defending = False
 
     def calculate_max_hp(self):
-        # Example (crappy) formula for max HP
         return 10 + self.stats.get('Endurance', 5) * 2
 
     def take_damage(self, damage):
