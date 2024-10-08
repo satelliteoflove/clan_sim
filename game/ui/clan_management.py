@@ -266,42 +266,64 @@ def add_adventurer_to_party(adventurers, party):
         print("\nNo available adventurers to add.")
         input('\nPress Enter to continue...')
         return
+
     print('\nAvailable Adventurers:')
     for idx, adv in enumerate(available_adventurers, start=1):
         status = 'Healthy' if adv.is_alive else 'Deceased'
         print(f"{idx}. {adv.name} - {adv.char_class} - Lvl {adv.level} - Status: {status}")
     print('\n0. Cancel')
-    print('\nSelect an adventurer to add: ', end='', flush=True)
-    val = input().strip()
-    if val.isdigit():
-        selection = int(val)
-        if selection == 0:
-            return
-        elif 1 <= selection <= len(available_adventurers):
-            selected_adv = available_adventurers[selection - 1]
-            print('\nEnter position to place the adventurer (row,column): ', end='', flush=True)
-            pos_input = input().strip()
-            try:
-                row_str, col_str = pos_input.split(',')
-                row = int(row_str) - 1
-                col = int(col_str) - 1
-                if 0 <= row <= 2 and 0 <= col <= 1:
+
+    while True:
+        print('\nSelect an adventurer to add: ', end='', flush=True)
+        val = input().strip()
+        if val.isdigit():
+            selection = int(val)
+            if selection == 0:
+                return
+            elif 1 <= selection <= len(available_adventurers):
+                selected_adv = available_adventurers[selection - 1]
+                break
+            else:
+                print(term.red('\nInvalid selection. Please enter a number corresponding to an adventurer.'))
+        else:
+            print(term.red('\nInvalid input. Please enter a numeric value.'))
+
+    while True:
+        # Display Current Formation with Row and Column Numbers
+        print('\nCurrent Formation:')
+        print(f"{'':10}Column 1    Column 2")
+        rows = ['Front Row', 'Middle Row', 'Back Row']
+        for idx, row_name in enumerate(rows, start=1):
+            # Assuming party.formation is a 3x2 grid (list of lists)
+            # If not, adjust accordingly
+            front = party.formation[idx - 1][0].name if party.formation[idx - 1][0] else '[Empty]'
+            back = party.formation[idx - 1][1].name if party.formation[idx - 1][1] else '[Empty]'
+            print(f"Row {idx}. {row_name}: {front:<10} {back:<10}")
+
+        print('\nEnter position to place the adventurer by specifying the row and column numbers separated by a comma (e.g., 1,2): ', end='', flush=True)
+        pos_input = input().strip()
+        try:
+            row_str, col_str = pos_input.split(',')
+            row = int(row_str.strip()) - 1  # Convert to 0-based index
+            col = int(col_str.strip()) - 1  # Convert to 0-based index
+
+            if 0 <= row <= 2 and 0 <= col <= 1:
+                if party.formation[row][col] is not None:
+                    print(term.red('\nThat position is already occupied. Please choose another position.'))
+                else:
                     success = party.add_member(selected_adv, position=(row, col))
                     if success:
-                        print(f"\n{selected_adv.name} added to the party at position ({row + 1}, {col + 1}).")
-                    input('\nPress Enter to continue...')
-                else:
-                    print(term.red('\nInvalid position. Rows are 1-3, columns are 1-2.'))
-                    input('\nPress Enter to continue...')
-            except ValueError:
-                print(term.red('\nInvalid input format. Please enter as row,column (e.g., 1,1).'))
-                input('\nPress Enter to continue...')
-        else:
-            print(term.red('\nInvalid selection. Please try again.'))
-            input('\nPress Enter to continue...')
-    else:
-        print(term.red('\nInvalid input. Please try again.'))
-        input('\nPress Enter to continue...')
+                        print(f"\n{selected_adv.name} added to the party at position (Row {row + 1}, Column {col + 1}).")
+                        input('\nPress Enter to continue...')
+                        return
+                    else:
+                        print(term.red('\nFailed to add the adventurer to the party. Please try again.'))
+            else:
+                print(term.red('\nInvalid position. Rows are 1-3 and columns are 1-2. Please try again.'))
+        except ValueError:
+            print(term.red('\nInvalid input format. Please enter as row,column (e.g., 1,2).'))
+
+    input('\nPress Enter to continue...')
 
 
 def remove_adventurer_from_party(party):
