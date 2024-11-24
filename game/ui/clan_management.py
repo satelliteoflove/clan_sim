@@ -31,7 +31,8 @@ def clan_management_interface(adventurers, parties, active_party):
         print('D. Resurrect Fallen Adventurers')
         print('E. Create New Adventurer')
         print('F. Filter/Sort Adventurers')
-        print('G. Return to Town Menu\n')
+        print('G. Equip Adventurer')
+        print('H. Return to Town Menu\n')
 
         print('Please select an option by entering its number or letter: ', end='', flush=True)
         val = input().strip().lower()
@@ -66,6 +67,8 @@ def clan_management_interface(adventurers, parties, active_party):
             print('\n[Filter/Sort functionality is not yet implemented.]')
             input('\nPress Enter to continue...')
         elif val == 'g':
+            equip_adventurer_interface(adventurers, shared_inventory)
+        elif val == 'h':
             # Return to town menu
             return
         else:
@@ -244,6 +247,9 @@ def edit_party_interface(adventurers, party):
         print('B. Remove Adventurer')
         print('C. Rearrange Formation')
         print('D. Return to Parties Menu\n')
+        print('E. Create New Adventurer')
+        print('F. Filter/Sort Adventurers')
+
 
         print('Please select an option: ', end='', flush=True)
         val = input().strip().lower()
@@ -378,6 +384,99 @@ def rearrange_party_formation(party):
     except ValueError:
         print(term.red('\nInvalid input format. Please enter as row,column (e.g., 1,1).'))
         input('\nPress Enter to continue...')
+
+
+def equip_adventurer_interface(adventurers, shared_inventory):
+    if not adventurers:
+        print("\nNo adventurers to equip.")
+        input('\nPress Enter to continue...')
+        return
+
+    print('\nSelect an adventurer to equip:')
+    for idx, adv in enumerate(adventurers, start=1):
+        print(f"{idx}. {adv.name} - {adv.char_class} - Lvl {adv.level} - Status: {'Alive' if adv.is_alive else 'KO'}")
+    print ('\n0. Cancel')
+    print('\nYour choice: ', end='', flush=True)
+    val = input().strip()
+
+    if val.isdigit():
+        selection = int(val)
+        if selection == 0:
+            return
+        elif 1 <= selection <= len(adventurers):
+            selected_adv = adventurers[selection - 1]
+            equip_adventurer(selected_adv, shared_inventory)
+        else:
+            print(term.red('\nInvalid selection. Please try again.'))
+            input('\nPress Enter to continue...')
+    else:
+        print(term.red('\nInvalid input. Please try again.'))
+        input('\nPress Enter to continue...')
+
+
+def equip_adventurer(adventurer, inventory):
+    while True:
+        print(term.bold(f"Equipment Slots for {adventurer.name}").center(term.width))
+        for idx, (slot, item) in enumerate(adventurer.equipment.items(), start=1):
+            item_name = item.name if item else '[Empty]'
+            print(f"{idx}. {slot.capitalize()}: {item_name}")
+        print('\n0. Return to previous menu')
+
+        choice = input("\nSelect an equipment slot to update: ").strip()
+        if choice == '0':
+            break
+        elif choice.isdigit() and 1 <= int(choice) <= len(adventurer.equipment):
+            slot = list(adventurer.equipment.keys())[int(choice) - 1]
+            equip_item_to_slot(adventurer, slot, inventory)
+        else:
+            print(term.red('\nInvalid selection. Please try again.'))
+            input('\nPress Enter to continue...')
+
+
+def equip_item_to_slot(adventurer, slot, inventory):
+    # Filter compatible items
+    compatible_items = [
+        item for item in inventory
+        if item.slot == slot and item.is_compatible(adventurer)
+    ]
+
+    if not compatible_items:
+        print(f"\nNo compatible items available for the {slot} slot.")
+        input("Press Enter to continue...")
+        return
+
+    print(f"\nAvailable items for {slot} slot:")
+    current_item = adventurer.equipment[slot]
+    for idx, item in enumerate(compatible_items, start=1):
+        item_name = f"[{item.name}]" if item == current_item else item.name
+        print(f"{idx}. {item_name} - {item.attributes}")
+
+    print("\n0. Cancel")
+
+    choice = input("\nSelect an item to equip: ").strip()
+    if choice == '0':
+        return
+    elif choice.isdigit() and 1 <= int(choice) <= len(compatible_items):
+        selected_item = compatible_items[int(choice) - 1]
+        if current_item:
+            unequip_item(adventurer, slot, inventory)
+        adventurer.equip_item(selected_item)
+        inventory.remove(selected_item)
+        print(f"\n{adventurer.name} has equipped {selected_item.name} in the {slot} slot.")
+        input("Press Enter to continue...")
+    else:
+        print("Invalid selection. Please try again.")
+        input("Press Enter to continue...")
+
+
+def unequip_item(adventurer, slot, inventory):
+    item = adventurer.unequip_item(slot)
+    if item:
+        inventory.append(item)
+        print(f"\n{adventurer.name} has unequipped {item.name} from the {slot} slot.")
+    else:
+        print(f"\nNo item to unequip in the {slot} slot.")
+    input("Press Enter to continue...")
 
 
 def set_active_party(parties, active_party):

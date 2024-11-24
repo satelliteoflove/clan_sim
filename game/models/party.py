@@ -7,6 +7,7 @@ class Party:
         # Each sublist represents a row: Front Row, Middle Row, Back Row
         self.formation = [[None, None] for _ in range(3)]
         self.members = []
+        self.party_inventory = [] # Items carried by the party
 
     def add_member(self, adventurer, position=None):
         """

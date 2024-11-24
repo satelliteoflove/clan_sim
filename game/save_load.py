@@ -50,6 +50,7 @@ def serialize_party(party):
             [adv.name if adv else None for adv in row]
             for row in party.formation
         ],
+        'party_inventory': [item.to_dict() for item in party.party_inventory]
     }
 
 
@@ -63,4 +64,5 @@ def deserialize_party(party_data, adventurers):
                 adventurer = name_to_adventurer.get(adv_name)
                 if adventurer:
                     party.add_member(adventurer, position=(row_idx, col_idx))
+    party.party_inventory = [Item.from_dict(item_data) for item_data in party_data['party_inventory']]
     return party
